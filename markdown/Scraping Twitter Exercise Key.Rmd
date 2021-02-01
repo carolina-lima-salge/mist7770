@@ -1,0 +1,58 @@
+---
+title: "Scraping Twitter Data"
+author: "Carolina Alves de Lima Salge"
+date: "2/1/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Twitter
+
+Below I will execute code to scrape data from Twitter without putting information from my app. Rather, I will rely on the connection from the `r rtweet` package.
+
+```{r}
+library(httr)
+library(rtweet)
+
+# Randomly sample (approximately 1%) from the live stream of all tweets 
+# for 10 secs
+sample <- stream_tweets(
+  q = "",
+  timeout = 10
+)
+
+# Stream Tweets that contain specific keywords for 30 seconds
+big4 <- stream_tweets(
+  q = "EY, PwC, Deloitte, KPMG",
+  timeout = 30
+)
+
+# Search for Twitter statuses containing a keyword, phrase, or multiple keywords.
+# ONLY RETURNS DATA FROM THE PAST 6-9 DAYS. 
+# To return more than 18,000 statuses in a single call, set "retryonratelimit" to TRUE.
+# Default is to return 100 tweets - to return more, set n to a higher value
+# search for a keyword
+deloitte_en_tweets <- search_tweets("Deloitte", lang = "en", include_rts = FALSE, n = 5000)
+save_as_csv(deloitte_en_tweets, "deloitte_en_tweets.csv", prepend_ids = TRUE, na = "", fileEncoding = "UTF-8")
+
+# Search for the timeline of users
+# Provide a user ID or screen name and specify the number of tweets (max of 3,200).
+deloitee_timeline <- get_timeline("@Deloitte", n = 3200)
+
+# Get the list of account followed by @Deloitte 
+# i.e., who does @Deloitte follow?
+deloitte_friends <- get_friends("@Deloitte")
+
+# Lookup function and Twitter trends
+deloittee_following <- lookup_users(deloitte_friends$user_id)
+
+## Store WOEID for Worldwide trends
+trends <- trends_available()
+trends
+atlanta <- trends$woeid[grep("Atlanta", trends$name, ignore.case = TRUE)]
+atlanta_trends <- get_trends(atlanta)
+```
+

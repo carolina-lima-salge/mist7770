@@ -1,0 +1,100 @@
+---
+title: "Scraping HTML At Home Exercises Key"
+author: "Carolina Alves de Lima Salge"
+date: "2/1/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 1
+
+See below the code to complete the first exercise:
+
+```{r}
+library(rvest)
+library(tidyverse)
+ebay <- read_html("https://www.ebay.com/sch/i.html?_from=R40&_nkw=mac+laptop&_sacat=0&rt=nc&_pgn=1")
+
+title <- ebay %>% 
+  html_nodes(".s-item__title") %>%
+  html_text() 
+title
+
+price <- ebay %>%
+  html_nodes(".s-item__detail--primary:nth-child(1) .s-item__price") %>%
+  html_text()
+price
+
+condition <- ebay %>%
+  html_nodes(".SECONDARY_INFO") %>%
+  html_text() 
+condition  
+
+photo <- ebay %>%
+  html_nodes(".s-item__image-img") %>%
+  html_attr("src")
+photo
+
+ebayDF <- tibble(title = title, 
+               price = price,
+               condition = condition,
+               photo = photo)
+
+write_csv(ebayDF, "ebayDFp1.csv")
+```
+
+## Exercise 2
+
+This exercise was more challenging since you needed to loop through all pages.
+
+```{r}
+ebayMP <- sprintf("https://www.ebay.com/sch/i.html?_from=R40&_nkw=mac+laptop&_sacat=0&rt=nc&_pgn=%d", 1:7) # wrapper allowing you to combine text with variable values
+
+# Loop through the links using the map function then
+tbl2 <- map(ebayMP, ~ {
+  
+  # Read link
+  doc <- read_html(.x)
+  
+  # Get the item title 
+  title <-
+    doc %>%
+    html_nodes(".s-item__title") %>%
+    html_text()
+  
+  # Get price
+  price <-
+    doc %>%
+    html_nodes(".s-item__detail--primary:nth-child(1) .s-item__price") %>%
+    html_text() 
+  
+  # Get condition
+  condition <- 
+    doc %>%
+    html_nodes(".SECONDARY_INFO") %>%
+    html_text() 
+  
+  # Get img link
+  photo_link <-
+    doc %>%
+    html_nodes(".s-item__image-img") %>%
+    html_attr("src")
+  
+  # Create a tibble to store the data
+  tibble(title = title, 
+         price = price,
+         condition = condition,
+         photo_link = photo_link)
+  
+}
+) %>%
+  
+  # Merge the data above with the page id
+  bind_rows(.id = 'page_no')
+
+
+write_csv(tbl2, "ebayDFp17.csv")
+```

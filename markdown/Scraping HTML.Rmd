@@ -1,0 +1,47 @@
+---
+title: "Scraping HTML"
+author: "Carolina Alves de Lima Salge"
+date: "2/1/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Web Scraping
+
+In this document I will scrape data about the LEGO movie from the IMDB website
+
+```{r cars}
+library(rvest)
+library(tidyverse)
+
+lego_movie <- read_html("http://www.imdb.com/title/tt1490017/")
+
+rating <- lego_movie %>% 
+  html_nodes("strong span") %>%
+  html_text() %>%
+  as.numeric()
+rating
+
+cast <- lego_movie %>%
+  html_nodes(".primary_photo+ td a") %>%
+  html_text() %>%
+  trimws()
+cast  
+
+poster <- lego_movie %>%
+  html_nodes(".poster img") %>%
+  html_attr("src")
+poster
+
+lego <- tibble(rating = rating, 
+       cast = cast,
+       poster = poster)
+lego
+
+write_csv(lego, "lego.csv")
+
+
+```
