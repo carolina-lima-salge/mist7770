@@ -1,0 +1,47 @@
+---
+title: "Visualization I Exercise Key"
+author: "Carolina Alves de Lima Salge"
+date: "2/15/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Slide Visuals
+
+```{r}
+library(tidyverse) # load package
+library(readxl)
+
+CoffeeChain <- read_excel("CoffeeChain.xlsx")
+
+ggplot(data = CoffeeChain) + 
+  geom_point(mapping = aes(x = Sales, y = Profit)) + 
+  theme_bw()
+
+ggplot(data = CoffeeChain) + 
+  geom_smooth(mapping = aes(x = Date, y = Profit)) + theme_bw()
+
+ggplot(data = CoffeeChain) + 
+  geom_smooth(mapping = aes(x = Date, y = Profit, color = ProductType)) + theme_bw()
+
+ggplot(data = CoffeeChain) + 
+  geom_smooth(mapping = aes(x = Date, y = Profit, color = ProductType), se = FALSE) + theme_bw()
+
+ggplot(data = CoffeeChain) + 
+  geom_bar(mapping = aes(x = ProductType)) + theme_bw()
+
+ggplot(data = CoffeeChain) + 
+  geom_bar(mapping = aes(x = ProductType, fill = Product)) + theme_bw()
+```
+
+## Exercise
+
+Below is the code the re-produce the graph from slide 21.
+
+```{r}
+ggplot(data = CoffeeChain) + 
+  geom_bar(mapping = aes(x = ProductType, fill = Product), position = "dodge2") + theme_bw() 
+```

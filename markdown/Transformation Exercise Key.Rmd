@@ -1,0 +1,50 @@
+---
+title: "Transformation Exercise Key"
+author: "Carolina Alves de Lima Salge"
+date: "2/15/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Transformation
+
+Below is the code from the slides
+
+```{r}
+library(tidyverse)
+
+orderList <- read_csv("List of Orders.csv")
+orderDetails <- read_csv("Order Details.csv")
+salesTarget <- read_csv("Sales target.csv")
+
+orderDetails %>%
+	filter(., Category == "Furniture") 
+
+orderDetails %>%
+	filter(., Category == "Furniture", Quantity > 1) 
+
+orderDetails %>%
+	filter(., Category == "Furniture" & Quantity > 1) 
+
+orderDetails %>%
+	filter(., Category == "Furniture" | Quantity > 1) 
+
+orderDetails %>% 
+	arrange(., desc(Profit))
+
+orderDetails %>% 
+	rename(., profit = Profit)
+
+orderDetails %>% 
+	mutate(., ProfitN = (Profit - min(Profit)) / (max(Profit) - min(Profit))) 
+
+orderDetails %>%
+  group_by(Category, `Sub-Category`) %>%
+  summarize(`Average Profit` = mean(Profit, na.rm = TRUE)) %>%
+  arrange(desc(`Average Profit`))
+
+```
+
