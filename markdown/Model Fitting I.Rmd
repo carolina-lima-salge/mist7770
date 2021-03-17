@@ -1,0 +1,28 @@
+---
+title: "Model Fitting I"
+author: "Carolina Alves de Lima Salge"
+date: "3/16/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Slide Code 
+
+```{r cars}
+library(tidyverse)
+library(readxl)
+
+CoffeeChain <- read_excel("CoffeeChain.xlsx")
+
+m1 <- lm(Profit ~ Market * MarketSize + Market * COGS, data = CoffeeChain)
+summary(m1)
+
+library(emmeans)
+emmeans(m1, ~ Market)
+emmeans(m1, ~ MarketSize | Market)
+emmeans(m1, ~ COGS | Market)
+
+```
