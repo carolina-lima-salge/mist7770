@@ -1,0 +1,96 @@
+---
+title: "Model Fitting II"
+author: "Carolina Alves de Lima Salge"
+date: "3/16/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Slide Code 
+
+```{r cars}
+library(tidyverse)
+library(caret)
+
+insurance <- read_csv("insurance.csv")
+insurance
+
+# transform categories to numbers
+insurance <- insurance %>% 
+  mutate(sexN = case_when(
+    sex == "male" ~ 1,
+    sex == "female" ~ 0
+    )) %>%
+  mutate(smokerN = case_when(
+    smoker == "yes" ~ 1,
+    smoker == "no" ~ 0
+    )) %>%
+  mutate(regionN = case_when(
+    region == "southwest" ~ 1,
+    region == "southeast" ~ 2,
+    region == "northwest" ~ 3,
+    region == "northwest" ~ 4
+    ))
+
+# only select numeric variables
+df <- insurance %>% 
+  dplyr::select(charges, age, sexN, bmi, children, smokerN, regionN)
+
+# drop missing values NAs
+df1 <- drop_na(df)
+
+# compute correlation between predictos
+cor(df1[,2:7])
+# compute correlation between predictos and the target
+cor(df1[,1:7])
+# age, bmi, and smoking are highly correlated with health costs
+
+set.seed(12L) # set a starting seed to be able to get reproducible results 
+
+# partition data
+trainIndex <- createDataPartition(df1$charges, # target variable
+                                  p = 0.8, # percentage that goes to training
+                                  list = FALSE, # results will not be in a list
+                                  times = 1) # number of partitions to create
+
+charges_train <- df1[trainIndex, ] # data frame for training
+charges_test <- df1[-trainIndex, ] # data frame for testing
+
+# use training set to build model
+model <- train(charges ~ age + bmi + smokerN, 
+               data = charges_train, # use training set
+               method = "lm") # linear regression 
+
+# now predict outcomes in test set
+p <- predict(model, charges_test)
+
+# how did we do? calculate performance across resamples
+# RMSE and R-squared
+postResample(pred = p, obs = charges_test$charges)
+# on average, our prediction is off by $5,779.18
+
+# how can we improve performance? Try a different method!
+model2 <- train(charges ~ age + bmi + smokerN, 
+               data = charges_train, # use training set
+               method = "ranger") # random forest 
+
+# now predict outcomes in test set
+p1 <- predict(model2, charges_test)
+
+# how did we do? calculate performance across resamples
+# RMSE and R-squared
+postResample(pred = p1, obs = charges_test$charges)
+# on average, our prediction is off by $4,632.99
+
+# first collect the resampling results of each model
+resamps <- resamples(list(LM = model,
+                          RF = model2))
+resamps
+
+# then use a simple t-test to evaluate the null hypothesis that there is no difference
+summary(diff(resamps))
+
+```
