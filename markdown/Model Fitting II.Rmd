@@ -32,7 +32,7 @@ insurance <- insurance %>%
     region == "southwest" ~ 1,
     region == "southeast" ~ 2,
     region == "northwest" ~ 3,
-    region == "northwest" ~ 4
+    region == "northeast" ~ 4
     ))
 
 # only select numeric variables
@@ -70,7 +70,7 @@ p <- predict(model, charges_test)
 # how did we do? calculate performance across resamples
 # RMSE and R-squared
 postResample(pred = p, obs = charges_test$charges)
-# on average, our prediction is off by $5,779.18
+# on average, our prediction is off by $5,808.00
 
 # how can we improve performance? Try a different method!
 model2 <- train(charges ~ age + bmi + smokerN, 
