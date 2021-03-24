@@ -42,12 +42,6 @@ df <- insurance %>%
 # drop missing values NAs
 df1 <- drop_na(df)
 
-# compute correlation between predictos
-cor(df1[,2:7])
-# compute correlation between predictos and the target
-cor(df1[,1:7])
-# age, bmi, and smoking are highly correlated with health costs
-
 set.seed(12L) # set a starting seed to be able to get reproducible results 
 
 # partition data
@@ -58,6 +52,12 @@ trainIndex <- createDataPartition(df1$charges, # target variable
 
 charges_train <- df1[trainIndex, ] # data frame for training
 charges_test <- df1[-trainIndex, ] # data frame for testing
+
+# compute correlation between predictos
+cor(charges_train[,2:7])
+# compute correlation between predictos and the target
+cor(charges_train[,1:7])
+# age, bmi, and smoking are highly correlated with health costs
 
 # use training set to build model
 model <- train(charges ~ age + bmi + smokerN, 
