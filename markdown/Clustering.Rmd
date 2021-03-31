@@ -1,0 +1,84 @@
+---
+title: "Clustering"
+author: "Carolina Alves de Lima Salge"
+date: "3/30/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Slide Code
+
+```{r}
+library(tidyverse)
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+
+apr14 <- read_csv("uber-raw-data-apr14.csv")
+may14 <- read_csv("uber-raw-data-may14.csv")
+jun14 <- read_csv("uber-raw-data-jun14.csv")
+jul14 <- read_csv("uber-raw-data-jul14.csv")
+aug14 <- read_csv("uber-raw-data-aug14.csv")
+sep14 <- read_csv("uber-raw-data-sep14.csv")
+
+df <- bind_rows(apr14, may14, jun14, jul14, aug14, sep14)
+# Date and time of Uber pickup
+# Latitude of the Uber pickup
+# Longitude of the Uber pickup
+# Taxi and Limousine Commission (TLC) company code affiliated with the Uber pickup
+
+df
+
+set.seed(12L) # set a starting seed to be able to get reproducible results 
+# debate where to partition data
+# some say it is not needed because unsupervised learning is not
+# concerned with prediction
+# others say it is needed to avoid overfitting
+# we will pull a random sample of the data to create the clusters
+# since we don’t have a target to use to create data partition
+# and also because the data is very large!
+
+df1 <- sample_n(df, 50000)
+
+# create cluster of pick up regions (columns 2 and 3)
+clusters <- kmeans(df1[, 2:3], 5, nstart = 25) # create 5 clusters
+# the Bronx, Brooklyn, Manhattan, Queens, and Staten Island
+# 25 random sets to be chosen
+
+# save the cluster number in the dataset as column 'borough'
+df1$borough <- as.factor(clusters$cluster)
+
+# cluster structure
+str(clusters)
+# cluster: which cluster does this observation belong to?
+# centers: a matrix of the center of each cluster
+clusters$centers
+# size: the number of observations in each cluster
+clusters$size # cluster 5 has the most observations
+
+# visualizing results
+library(leaflet)
+library(widgetframe)
+
+pal <- colorFactor(c("yellow", "orange","navy", "magenta", "black"), domain = c(1:5))
+
+leaflet(data = df1) %>%
+  addTiles() %>%
+  addMarkers(lng = -74.0060, lat = 40.7128) 
+
+leaflet(data = df1) %>%
+  addTiles() %>%
+  addMarkers(lng = -74.0060, lat = 40.7128) %>%
+  addCircleMarkers(label = ~borough, color = ~pal(borough), radius = 1) 
+
+
+# number of clusters?
+df2 <- df1 %>% select(Lat, Lon) %>% sample_n(5000) # memory exhausted 
+fviz_nbclust(df2, kmeans, method = "wss")
+# 2, 3, 4, 5, or 6? Tough to tell
+
+```
